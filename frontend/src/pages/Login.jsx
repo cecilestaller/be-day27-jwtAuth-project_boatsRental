@@ -2,6 +2,7 @@ import { useState } from "react";
 import { backendUrl } from "../api/index.js";
 import { Link } from "react-router-dom";
 import Nav from "../components/Nav.jsx";
+import { silentRefreshLoop } from "../utils/token";
 
 const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState("");
@@ -25,8 +26,18 @@ const Login = ({ onLoginSuccess }) => {
       .then((res) => res.json())
       .then(({ success, result, message }) => {
         if (!success) return setErrorMessage(message || "Login failed");
+        // result.tokens.refreshToken
         const authorization = `Bearer ${result.tokens.accessToken}`;
         onLoginSuccess(authorization, result.user); // result.user sind die profile infos
+
+        silentRefreshLoop(
+          result.tokens.accessToken,
+          result.tokens.refreshToken,
+          function onSiletRefreshDoneCallback(newAccessToken) {
+            const authorization = `Bearer ${newAccessToken}`;
+            onLoginSuccess(authorization, result.user); // update suthorization state
+          }
+        );
         setErrorMessage(""); // reset error message after success
         setSuccessMessage(
           "Login successful, please go to Dashboard and enjoy!"
