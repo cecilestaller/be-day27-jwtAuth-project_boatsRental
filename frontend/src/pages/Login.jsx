@@ -16,20 +16,17 @@ const Login = ({ onLoginSuccess }) => {
       return;
     }
 
-    // klartext email:password in Base64 umwandeln:
-    const emailAndPasswordBase64 = btoa(`${email}:${password}`);
-    // inhalt für req.headers.authorization erstellen (Basic Base64-String)
-    const authorization = `Basic ${emailAndPasswordBase64}`;
-
     // LOGIN-FETCH:
     fetch(`${backendUrl}/api/users/login`, {
       method: "POST",
-      headers: { authorization },
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     })
       .then((res) => res.json())
       .then(({ success, result, message }) => {
         if (!success) return setErrorMessage(message || "Login failed");
-        onLoginSuccess(authorization, result); // result sind die profile infos
+        const authorization = `Bearer ${result.tokens.accessToken}`;
+        onLoginSuccess(authorization, result.user); // result.user sind die profile infos
         setErrorMessage(""); // reset error message after success
         setSuccessMessage(
           "Login successful, please go to Dashboard and enjoy!"
