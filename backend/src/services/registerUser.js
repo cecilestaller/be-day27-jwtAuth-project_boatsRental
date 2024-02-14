@@ -1,5 +1,6 @@
 import { User } from "../models/index.js";
 import { generateRandomSalt, hashPassword } from "../utils/hash.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 // userInfo := { name*, email*, password*, bio, profilePictureUrl }
 export async function registerUser({
@@ -20,6 +21,20 @@ export async function registerUser({
     profilePictureUrl,
   });
   await user.save();
+
+  // --- Hier soll Verifizierungs-Email an User geschickt werden:
+
+  // const sixDigitCode = 678900; // use random to generate!
+  await sendEmail({
+    to: email,
+    subject: "Registration Successful!",
+    text: `Hello ${name},
+  welcome to Bootsverleih Gezeitenklo.
+  Your registration was succesful. 
+  Yours,
+  Bootsverleih Team`,
+  });
+
   return userToProfileInfo(user);
 }
 
