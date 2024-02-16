@@ -20,14 +20,13 @@ function calcRefreshTokenAfterMs(token) {
   return refreshTokenAfterMs;
 }
 
-async function doSilentRefresh(refreshToken) {
+export async function doSilentRefresh() {
   try {
     const response = await fetch(backendUrl + "/api/users/refreshToken", {
       method: "POST",
-      headers: { authorization: `Bearer ${refreshToken}` },
+      credentials: "include", // nimm den httpOnly cookies und sende sie in der request mit
     });
     const { success, result, error, message } = await response.json();
-    console.log(success, result, error, message);
     if (!success) {
       console.log(error);
       console.log(message);
@@ -40,26 +39,21 @@ async function doSilentRefresh(refreshToken) {
   }
 }
 
-export function silentRefreshLoop(
-  currentAccessToken,
-  refreshToken,
-  onSiletRefreshDoneCb
-) {
+export function silentRefreshLoop(currentAccessToken, onSiletRefreshDoneCb) {
   // abwarten, zeit: calcRefreshTokenAfterMs(accessToken)
   const delay = calcRefreshTokenAfterMs(currentAccessToken);
   console.log("delaying silent refresh to", delay, "ms");
   setTimeout(async () => {
     // fetch refresh endpoint with refreshToken --> newAccessToken
     console.log("doing silent refresh...");
-    const newAccessToken = await doSilentRefresh(refreshToken);
-    console.log("done silent refresh:", {
-      currentAccessToken,
-      newAccessToken,
-      refreshToken,
-    });
+    const newAccessToken = await doSilentRefresh();
+    console.log(
+      "silent refresh success, token length:",
+      newAccessToken?.length
+    );
     onSiletRefreshDoneCb(newAccessToken);
     // start the loop
     // doSilentRefresh for newAccessToken too!!
-    silentRefreshLoop(newAccessToken, refreshToken, onSiletRefreshDoneCb);
+    silentRefreshLoop(newAccessToken, onSiletRefreshDoneCb);
   }, delay);
 }

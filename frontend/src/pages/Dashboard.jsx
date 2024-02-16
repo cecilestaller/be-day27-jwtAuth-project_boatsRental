@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { backendUrl } from "../api";
 import Nav from "../components/Nav";
 import { Link } from "react-router-dom";
+import LogoutButton from "../components/LogoutButton";
 
-const Dashboard = ({ authorization, userProfileInfo }) => {
+const Dashboard = ({ authorization, userProfileInfo, onLogout }) => {
   const [alleBoote, setAlleBoote] = useState([]);
 
   // Anzahl aller Boote
@@ -47,13 +48,13 @@ const Dashboard = ({ authorization, userProfileInfo }) => {
 
       <section className="content-wrapper">
         <h2>Dashboard</h2>
-
+        {authorization && <LogoutButton onLogout={onLogout} />}
         {!authorization ? (
           <Link to="/login">
             <button className="btn">Login</button>
           </Link>
         ) : (
-          <h2>Willkommen {userProfileInfo.name}</h2>
+          <h2>Willkommen {userProfileInfo?.name}</h2>
         )}
 
         {!authorization ? (

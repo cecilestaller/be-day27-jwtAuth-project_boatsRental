@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema(
     passwordSalt: { type: String, required: true },
     bio: { type: String },
     profilePictureUrl: { type: String },
+    sixDigitCode: { type: String },
+    emailVerified: { type: Boolean, default: false },
   },
   { collection: "users", timestamps: true }
 );

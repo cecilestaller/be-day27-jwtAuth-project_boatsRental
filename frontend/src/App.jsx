@@ -10,6 +10,8 @@ import BoatDetail from "./pages/BoatDetail";
 import Login from "./pages/Login";
 import { useState } from "react";
 import RegisterNewUser from "./pages/RegisterNewUser";
+import LoadingWrapper from "./components/LoadingWrapper";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
   const [authorization, setAuthorization] = useState(null);
@@ -23,29 +25,45 @@ function App() {
             <Route
               path="/"
               element={
-                <Dashboard
+                <LoadingWrapper
                   authorization={authorization}
-                  userProfileInfo={userProfileInfo}
-                />
+                  saveAuthorization={(auth) => setAuthorization(auth)}
+                >
+                  <Dashboard
+                    authorization={authorization}
+                    userProfileInfo={userProfileInfo}
+                    onLogout={() => setAuthorization(null)}
+                  />
+                </LoadingWrapper>
               }
             />
             <Route
               path="/boatlist"
               element={
-                <Bootsuebersicht
+                <LoadingWrapper
                   authorization={authorization}
-                  userProfileInfo={userProfileInfo}
-                />
+                  saveAuthorization={(auth) => setAuthorization(auth)}
+                >
+                  <Bootsuebersicht
+                    authorization={authorization}
+                    userProfileInfo={userProfileInfo}
+                  />
+                </LoadingWrapper>
               }
             />
             <Route path="/reservierungen" element={<Reservierungen />} />
             <Route
               path="/add-boot"
               element={
-                <AddNewBootForm
+                <LoadingWrapper
                   authorization={authorization}
-                  userProfileInfo={userProfileInfo}
-                />
+                  saveAuthorization={(auth) => setAuthorization(auth)}
+                >
+                  <AddNewBootForm
+                    authorization={authorization}
+                    userProfileInfo={userProfileInfo}
+                  />
+                </LoadingWrapper>
               }
             />
             <Route
@@ -65,6 +83,7 @@ function App() {
               }
             />
             <Route path="/register" element={<RegisterNewUser />} />
+            <Route path="/verify-email/:userId" element={<VerifyEmail />} />
           </Routes>
         </BrowserRouter>
       </main>

@@ -22,6 +22,7 @@ const Login = ({ onLoginSuccess }) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
+      credentials: "include", // muss sein für refresh token! -- "save httpOnly cookie session"
     })
       .then((res) => res.json())
       .then(({ success, result, message }) => {
@@ -32,10 +33,9 @@ const Login = ({ onLoginSuccess }) => {
 
         silentRefreshLoop(
           result.tokens.accessToken,
-          result.tokens.refreshToken,
           function onSiletRefreshDoneCallback(newAccessToken) {
             const authorization = `Bearer ${newAccessToken}`;
-            onLoginSuccess(authorization, result.user); // update suthorization state
+            onLoginSuccess(authorization, result.user); // update authorization state
           }
         );
         setErrorMessage(""); // reset error message after success

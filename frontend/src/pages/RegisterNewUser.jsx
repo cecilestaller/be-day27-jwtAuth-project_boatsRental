@@ -1,56 +1,47 @@
 import { useState } from "react";
 import Nav from "../components/Nav";
 import { backendUrl } from "../api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const RegisterNewUser = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
-  const [profilePictureUrl, setProfilePictureUrl] = useState(null);
+  // const [profilePictureUrl, setProfilePictureUrl] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  const navigate = useNavigate();
+
+  // ProfilePicture bei der Registrierung fehl am platz, wird deshalb rausgenommen...
 
   const registerNewUser = (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("image", profilePictureUrl, profilePictureUrl.name);
+    if (!name || !email || !password) {
+      setErrorMessage("All fields must be defined");
+      return;
+    }
 
-    fetch(`${backendUrl}/api/files/upload`, {
+    if (password !== confirmPassword) {
+      setErrorMessage("Password confirmation missmatches");
+      return;
+    }
+
+    fetch(backendUrl + "/api/users/register", {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
     })
-      .then((res) => res.json())
-      .then(({ success, result, error, message }) => {
-        if (success) return result.filename;
-        else {
-          console.log({ message });
-          throw error; // jump to catch
-        }
-      })
-      .then((uploadedFilename) =>
-        fetch(`${backendUrl}/api/users/register`, {
-          method: "POST",
-          body: JSON.stringify({
-            name,
-            email,
-            bio,
-            password,
-            profilePictureUrl: uploadedFilename,
-          }),
-          headers: { "Content-Type": "application/json" },
-        })
-      )
       .then((res) => res.json())
       .then(({ success, result, error, message }) => {
         console.log({ success, result, error, message });
         if (!success) return setErrorMessage(message || "Registration failed");
         setErrorMessage(""); // reset error message after success
-        setSuccessMessage(
-          "Registration successful, please Login to your account and enjoy!"
-        );
+        setSuccessMessage("Registration successful, please verify your Email!");
+        navigate("/verify-email/" + result._id);
       })
       .catch((error) => console.log(error));
   };
@@ -98,7 +89,16 @@ const RegisterNewUser = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <div>
+          <div className="form-input">
+            <label htmlFor="password-confirm">Confirm Password</label>
+            <input
+              id="password-confirm"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
+          {/* <div>
             <label htmlFor="profilePic">Lade ein Profilbild hoch:</label>
             <input
               type="file"
@@ -106,7 +106,7 @@ const RegisterNewUser = () => {
               id="profilePic"
               onChange={(e) => setProfilePictureUrl(e.target.files[0])}
             />
-          </div>
+          </div> */}
 
           <button className="btn" onClick={registerNewUser}>
             Register
@@ -126,3 +126,32 @@ const RegisterNewUser = () => {
 };
 
 export default RegisterNewUser;
+
+// FETCH wenn ProfilePic gleich mit hoch geladen werden soll:
+// const formData = new FormData();
+// formData.append("image", profilePictureUrl, profilePictureUrl.name);
+// fetch(`${backendUrl}/api/files/upload`, {
+//   method: "POST",
+//   body: formData,
+// })
+//   .then((res) => res.json())
+//   .then(({ success, result, error, message }) => {
+//     if (success) return result.filename;
+//     else {
+//       console.log({ message });
+//       throw error; // jump to catch
+//     }
+//   })
+//   .then((uploadedFilename) =>
+//     fetch(`${backendUrl}/api/users/register`, {
+//       method: "POST",
+//       body: JSON.stringify({
+//         name,
+//         email,
+//         bio,
+//         password,
+//         profilePictureUrl: uploadedFilename,
+//       }),
+//       headers: { "Content-Type": "application/json" },
+//     })
+//   )
